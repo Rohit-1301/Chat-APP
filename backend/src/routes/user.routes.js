@@ -4,7 +4,7 @@ import {
   logout,
   signup,
   updateProfile,
-  check,
+  checkAuth,
 } from "../controllers/auth.controllers.js";
 import { protectRoute } from "../middlewares/auth.middlewares.js";
 
@@ -16,6 +16,7 @@ router.post("/logout", logout);
 
 router.put("/update-profile", protectRoute, updateProfile);
 
-router.get("/check", protectRoute, check);
+// Change this to match frontend call
+router.get("/check-auth", protectRoute, checkAuth);
 
 export default router;

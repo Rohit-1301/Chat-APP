@@ -38,12 +38,13 @@ export const signup = async (req, res) => {
       await newUser.save();
 
       res.status(201).json({
-        id: newUser._id,
-        username: newUser._username,
-        email: newUser._username,
+        _id: newUser._id,
+        username: newUser.username,
+        email: newUser.email,
+        profilepic: newUser.profilepic,
       });
     } else {
-      return res.status(400).json({ message: "User is Invalid" });
+      return res.status(400).json({ message: "Invalid user data" });
     }
   } catch (error) {
     console.log("Error in Signup");
@@ -56,25 +57,26 @@ export const login = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      res.status(404).json("Invalid credentials");
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
     const isPasswordcorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordcorrect) {
-      res.status(404).json("Invalid credentials");
+      return res.status(400).json({ message: "Invalid credentials" });
     }
+    
     generateToken(user._id, res);
 
     res.status(200).json({
       _id: user._id,
-      username: user._username,
-      email: user._username,
+      username: user.username,
+      email: user.email,
       profilepic: user.profilepic,
     });
   } catch (error) {
     console.log("Error while logging the user", error.message);
-    res.status(500).json("Something went wrong");
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -113,11 +115,20 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-export const check = (req, res) => {
+// export const check = (req, res) => {
+//   try {
+//     res.status(200).json(req.user);
+//   } catch (error) {
+//     console.log("Error in checking user authentication", error.message);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
+
+export const checkAuth = (req, res) => {
   try {
     res.status(200).json(req.user);
   } catch (error) {
-    console.log("Error in checking user authentication", error.message);
-    res.status(500).json({ message: "Internal server error" });
+    console.log("Error in checkAuth controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
