@@ -5,22 +5,15 @@ import ProfilePage from "./pages/ProfilePage";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import SettingsPage from "./pages/SettingsPage";
+import ThemeTest from "./pages/ThemeTest";
 import { useAuthStore } from "./store/useAuthStore";
-import { useSettingsStore } from "./store/useSettingsStore";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
-  const { theme, initializeTheme } = useSettingsStore();
   
   useEffect(() => {
     checkAuth();
-    initializeTheme(); // Initialize theme on app load
-  }, [checkAuth, initializeTheme]);
-
-  // Force re-render when theme changes
-  useEffect(() => {
-    console.log("Theme changed to:", theme);
-  }, [theme]);
+  }, [checkAuth]);
 
   if (isCheckingAuth) {
     return (
@@ -36,25 +29,28 @@ const App = () => {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route 
-        path="/signup" 
-        element={!authUser ? <SignUpPage /> : <Navigate to="/" />} 
-      />
-      <Route 
-        path="/login" 
-        element={!authUser ? <LoginPage /> : <Navigate to="/" />} 
-      />
-      <Route 
-        path="/settings" 
-        element={authUser ? <SettingsPage /> : <Navigate to="/login" />} 
-      />
-      <Route 
-        path="/profile" 
-        element={authUser ? <ProfilePage /> : <Navigate to="/login" />} 
-      />
-    </Routes>
+    <div className="app-root">
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/theme-test" element={<ThemeTest />} />
+        <Route 
+          path="/signup" 
+          element={!authUser ? <SignUpPage /> : <Navigate to="/" />} 
+        />
+        <Route 
+          path="/login" 
+          element={!authUser ? <LoginPage /> : <Navigate to="/" />} 
+        />
+        <Route 
+          path="/settings" 
+          element={authUser ? <SettingsPage /> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/profile" 
+          element={authUser ? <ProfilePage /> : <Navigate to="/login" />} 
+        />
+      </Routes>
+    </div>
   );
 };
 

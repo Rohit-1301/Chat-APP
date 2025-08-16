@@ -1,11 +1,12 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { persist } from "zustand/middleware";
 
-export const useSettingsStore = create(
+export const useSettingsStore = create()(
   persist(
     (set, get) => ({
       // Theme settings
       theme: "light", // Default to light mode
+      themeUpdateCount: 0, // Add a counter to force re-renders
       
       // Language settings
       language: "en", // Default to English
@@ -26,31 +27,48 @@ export const useSettingsStore = create(
 
       // Actions
       setTheme: (newTheme) => {
-        console.log("Setting theme to:", newTheme); // Debug log
+        console.log("🎨 Setting theme to:", newTheme);
+        console.log("🔍 Current DOM classes before:", document.documentElement.className);
         
-        // Update state first
-        set({ theme: newTheme });
+        // Clear any existing theme classes first
+        document.documentElement.classList.remove("dark");
         
-        // Apply theme to document immediately
-        requestAnimationFrame(() => {
-          if (newTheme === "dark") {
+        // Apply theme to DOM FIRST
+        if (newTheme === "dark") {
+          document.documentElement.classList.add("dark");
+          document.documentElement.setAttribute('data-theme', 'dark');
+          console.log("✅ Applied dark theme");
+        } else if (newTheme === "light") {
+          document.documentElement.classList.remove("dark");
+          document.documentElement.setAttribute('data-theme', 'light');
+          console.log("✅ Applied light theme");
+        } else if (newTheme === "system") {
+          const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (systemPrefersDark) {
             document.documentElement.classList.add("dark");
-            console.log("Applied dark theme - classes:", document.documentElement.className);
-          } else if (newTheme === "light") {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            console.log("✅ Applied system dark theme");
+          } else {
             document.documentElement.classList.remove("dark");
-            console.log("Applied light theme - classes:", document.documentElement.className);
-          } else if (newTheme === "system") {
-            // Follow system preference
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (systemPrefersDark) {
-              document.documentElement.classList.add("dark");
-              console.log("Applied system dark theme");
-            } else {
-              document.documentElement.classList.remove("dark");
-              console.log("Applied system light theme");
-            }
+            document.documentElement.setAttribute('data-theme', 'light');
+            console.log("✅ Applied system light theme");
           }
-        });
+        }
+        
+        console.log("🔍 Current DOM classes after:", document.documentElement.className);
+        
+        // Update state with incremented counter to force re-renders
+        set((state) => ({ 
+          theme: newTheme,
+          themeUpdateCount: state.themeUpdateCount + 1
+        }));
+        
+        // Force re-render by dispatching custom event
+        window.dispatchEvent(new CustomEvent('theme-changed', { 
+          detail: { theme: newTheme }
+        }));
+        
+        console.log("🔄 Theme update complete:", newTheme);
       },
 
       setLanguage: (language) => set({ language }),
@@ -68,25 +86,28 @@ export const useSettingsStore = create(
       // Initialize theme on app load
       initializeTheme: () => {
         const state = get();
-        const currentTheme = state.theme || "light"; // Default to light if no theme is set
-        console.log("Initializing theme:", currentTheme); // Debug log
+        const currentTheme = state.theme || "light";
+        console.log("🚀 Initializing theme:", currentTheme);
         
         // Apply theme immediately
         if (currentTheme === "dark") {
           document.documentElement.classList.add("dark");
-          console.log("Init: Applied dark theme");
+          document.documentElement.setAttribute('data-theme', 'dark');
+          console.log("✅ Init: Applied dark theme");
         } else if (currentTheme === "light") {
           document.documentElement.classList.remove("dark");
-          console.log("Init: Applied light theme");
+          document.documentElement.setAttribute('data-theme', 'light');
+          console.log("✅ Init: Applied light theme");
         } else if (currentTheme === "system") {
-          // Follow system preference
           const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
           if (systemPrefersDark) {
             document.documentElement.classList.add("dark");
-            console.log("Init: Applied system dark theme");
+            document.documentElement.setAttribute('data-theme', 'dark');
+            console.log("✅ Init: Applied system dark theme");
           } else {
             document.documentElement.classList.remove("dark");
-            console.log("Init: Applied system light theme");
+            document.documentElement.setAttribute('data-theme', 'light');
+            console.log("✅ Init: Applied system light theme");
           }
           
           // Listen for system theme changes
@@ -95,22 +116,25 @@ export const useSettingsStore = create(
             if (get().theme === "system") {
               if (e.matches) {
                 document.documentElement.classList.add("dark");
-                console.log("System changed to dark");
+                document.documentElement.setAttribute('data-theme', 'dark');
+                console.log("✅ System changed to dark");
               } else {
                 document.documentElement.classList.remove("dark");
-                console.log("System changed to light");
+                document.documentElement.setAttribute('data-theme', 'light');
+                console.log("✅ System changed to light");
               }
             }
           };
           
-          // Remove any existing listener before adding new one
           mediaQuery.removeEventListener('change', handleSystemThemeChange);
           mediaQuery.addEventListener('change', handleSystemThemeChange);
         }
+        
+        console.log("🎯 Theme initialization complete");
       },
     }),
     {
-      name: "chat-app-settings", // Storage key
+      name: "chat-app-settings",
       getStorage: () => localStorage,
     }
   )

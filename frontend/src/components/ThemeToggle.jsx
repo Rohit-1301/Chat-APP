@@ -1,12 +1,13 @@
 import React from "react";
 import { Sun, Moon } from "lucide-react";
-import { useSettingsStore } from "../store/useSettingsStore";
+import { useTheme } from "../contexts/ThemeContext_new";
 
 const ThemeToggle = ({ className = "" }) => {
-  const { theme, setTheme } = useSettingsStore();
+  const { theme, setTheme } = useTheme();
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
+    console.log("🔄 ThemeToggle: Changing theme from", theme, "to", newTheme);
     setTheme(newTheme);
   };
 
