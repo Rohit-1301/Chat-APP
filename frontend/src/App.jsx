@@ -6,21 +6,29 @@ import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import SettingsPage from "./pages/SettingsPage";
 import { useAuthStore } from "./store/useAuthStore";
+import { useSettingsStore } from "./store/useSettingsStore";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+  const { theme, initializeTheme } = useSettingsStore();
   
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+    initializeTheme(); // Initialize theme on app load
+  }, [checkAuth, initializeTheme]);
+
+  // Force re-render when theme changes
+  useEffect(() => {
+    console.log("Theme changed to:", theme);
+  }, [theme]);
 
   if (isCheckingAuth) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
-        <div className="bg-white rounded-lg p-8 shadow-lg">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 dark:from-gray-800 dark:via-gray-900 dark:to-black">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-lg border border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <div className="text-xl font-semibold text-gray-700">Loading...</div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
+            <div className="text-xl font-semibold text-gray-700 dark:text-gray-300">Loading...</div>
           </div>
         </div>
       </div>

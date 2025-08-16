@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
+import ThemeToggle from "../components/ThemeToggle";
 
 
 // --- SHARED COMPONENTS (can be moved to a separate file e.g., /components/common.js) ---
@@ -22,7 +23,7 @@ const InputField = ({ id, type, placeholder, icon, value, onChange, minLength })
             name={id}
             type={type}
             placeholder={placeholder}
-            className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+            className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
             value={value}
             onChange={onChange}
             required
@@ -60,16 +61,21 @@ const SignUpPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center font-sans p-4">
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col items-center justify-center font-sans p-4">
+            {/* Theme Toggle */}
+            <div className="absolute top-4 right-4">
+                <ThemeToggle />
+            </div>
+            
             <div className="w-full max-w-md">
                 <header className="flex flex-col items-center justify-center text-center mb-8">
                     <div className="bg-blue-600 p-4 rounded-full shadow-lg mb-4">
                         <ChatBubbleIcon />
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-800">Create Account</h1>
-                    <p className="text-gray-600 mt-2">Join us and start chatting with friends</p>
+                    <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Create Account</h1>
+                    <p className="text-gray-600 dark:text-gray-300 mt-2">Join us and start chatting with friends</p>
                 </header>
-                <div className="bg-white rounded-2xl shadow-xl p-8">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         <InputField
                             id="username"
@@ -110,9 +116,9 @@ const SignUpPage = () => {
                         </button>
                     </form>
                 </div>
-                <p className="text-center text-gray-600 mt-6">
+                <p className="text-center text-gray-600 dark:text-gray-300 mt-6">
                     Already have an account?{" "}
-                    <Link to="/login" className="text-blue-600 hover:underline font-semibold">
+                    <Link to="/login" className="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
                         Login
                     </Link>
                 </p>
