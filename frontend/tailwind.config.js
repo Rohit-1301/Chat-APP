@@ -23,5 +23,7 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // Remove DaisyUI for now to eliminate conflicts
+  ],
 }

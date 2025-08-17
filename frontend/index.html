@@ -5,6 +5,54 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('chat-app-theme');
+          var theme = saved || 'light';
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var effective = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
+          var root = document.documentElement;
+          
+          // Force clear all theme classes
+          root.className = root.className.replace(/\b(dark|light)\b/g, '');
+          root.removeAttribute('data-theme');
+          
+          console.log('🚀 Pre-hydration theme:', effective);
+          
+          if (effective === 'dark') {
+            root.classList.add('dark');
+            root.setAttribute('data-theme', 'dark');
+            root.style.backgroundColor = '#111827';
+            root.style.colorScheme = 'dark';
+          } else {
+            root.classList.add('light'); // Explicitly add light class
+            root.setAttribute('data-theme', 'light');
+            root.style.backgroundColor = '#ffffff';
+            root.style.colorScheme = 'light';
+          }
+          
+          // Set body styles when it's available
+          document.addEventListener('DOMContentLoaded', function() {
+            var body = document.body;
+            if (effective === 'dark') {
+              body.style.backgroundColor = '#111827';
+              body.style.color = '#f3f4f6';
+              body.style.colorScheme = 'dark';
+            } else {
+              body.style.backgroundColor = '#ffffff';
+              body.style.color = '#111827';
+              body.style.colorScheme = 'light';
+            }
+          });
+          
+          console.log('🔍 Pre-hydration HTML classes:', root.className);
+          
+        } catch (e) {
+          console.error('Theme pre-hydration error:', e);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

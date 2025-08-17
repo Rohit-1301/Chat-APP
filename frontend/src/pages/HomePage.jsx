@@ -352,58 +352,64 @@ const HomePage = () => {
 
     // --- Main Chat Interface (for authenticated users) ---
     return (
-        <div className="h-screen flex bg-gray-50 dark:bg-gray-900">
+        <div className="h-screen flex bg-gray-50">
             {/* Sidebar */}
-            <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+            <div className="w-80 bg-white border-r border-gray-200 flex flex-col shadow-lg">
                 {/* Header */}
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
                     <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                <Code className="w-5 h-5 text-white" />
+                        <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
+                                <Code className="w-6 h-6 text-white" />
                             </div>
-                            <h1 className="text-xl font-bold text-gray-900 dark:text-white">DevChat</h1>
+                            <div>
+                                <h1 className="text-xl font-bold text-gray-900 tracking-tight">DevChat</h1>
+                                <p className="text-xs text-gray-600 font-medium">Professional Hub</p>
+                            </div>
                         </div>
                         
                         {/* User Menu */}
                         <div className="relative" ref={dropdownRef}>
                             <button
                                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                                className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                className="flex items-center space-x-2 p-2 text-gray-700 hover:text-gray-900 hover:bg-white/70 rounded-lg transition-all duration-200"
                             >
-                                <span className="text-sm font-medium">{authUser.username}</span>
+                                <span className="text-sm font-semibold">{authUser.username}</span>
                                 <ChevronDown className="w-4 h-4" />
                             </button>
                             
                             {/* Profile Dropdown */}
                             {showProfileDropdown && (
-                                <div className="absolute top-8 right-0 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-2 w-48 z-50">
+                                <div className="absolute top-12 right-0 border border-gray-200 rounded-xl shadow-xl py-2 w-48 z-50 backdrop-blur-lg bg-white/95">
                                     <Link
                                         to="/profile"
-                                        className="flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-purple-600 transition-all duration-200"
                                         onClick={() => setShowProfileDropdown(false)}
                                     >
                                         <User className="w-4 h-4 mr-3" />
-                                        Profile
+                                        <span className="font-medium">Profile</span>
                                     </Link>
                                     <Link
                                         to="/settings"
-                                        className="flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                                        className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-all duration-200"
                                         onClick={() => setShowProfileDropdown(false)}
                                     >
                                         <Settings className="w-4 h-4 mr-3" />
-                                        Settings
+                                        <span className="font-medium">Settings</span>
                                     </Link>
-                                    <hr className="my-2 border-gray-200 dark:border-gray-600" />
+                                    <div className="my-1">
+                                        <ThemeToggle inDropdown={true} />
+                                    </div>
+                                    <hr className="my-2 border-gray-200" />
                                     <button
                                         onClick={() => {
                                             setShowProfileDropdown(false);
                                             handleLogout();
                                         }}
-                                        className="flex items-center w-full px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                        className="flex items-center w-full px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 rounded-lg mx-2 mb-1"
                                     >
                                         <LogOut className="w-4 h-4 mr-3" />
-                                        Logout
+                                        <span className="font-medium">Logout</span>
                                     </button>
                                 </div>
                             )}
@@ -411,50 +417,71 @@ const HomePage = () => {
                     </div>
                     
                     {/* Search */}
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
+                    <div className="relative px-4 mb-4">
+                        <Search className="absolute left-7 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <input
                             type="text"
-                            placeholder="search"
-                            className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            placeholder="Search conversations..."
+                            className="w-full pl-10 pr-4 py-3 bg-gray-100 text-gray-900 placeholder-gray-500 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white text-sm font-medium transition-all duration-200"
                         />
                     </div>
                 </div>
 
                 {/* Chats Section */}
-                <div className="flex-1 overflow-y-auto">
-                    <div className="p-4">
-                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Chats</h2>
+                <div className="flex-1 overflow-y-auto px-4">
+                    <div className="mb-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-bold text-gray-900">Recent Chats</h2>
+                            <button className="text-purple-600 hover:text-purple-700 transition-colors">
+                                <PlusCircle className="w-5 h-5" />
+                            </button>
+                        </div>
                         <div className="space-y-2">
                             {conversations.map((conv) => (
                                 <div
                                     key={conv.id}
                                     onClick={() => setSelectedConversation(conv)}
-                                    className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors ${
+                                    className={`flex items-center p-4 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-md ${
                                         selectedConversation?.id === conv.id 
-                                            ? 'bg-blue-50 dark:bg-blue-900/30' 
-                                            : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                                            ? 'bg-gradient-to-r from-purple-50 to-blue-50 border-l-4 border-purple-500 shadow-md' 
+                                            : 'hover:bg-gray-50 hover:scale-[1.02]'
                                     }`}
                                 >
                                     <div className="relative">
                                         <img 
                                             src={conv.avatar} 
                                             alt={conv.name} 
-                                            className="w-10 h-10 rounded-full"
+                                            className="w-12 h-12 rounded-full border-2 border-white shadow-sm"
                                         />
-                                        <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white dark:border-gray-800 ${
-                                            conv.status === 'Online' ? 'bg-green-500' : 
-                                            conv.status === 'Away' ? 'bg-yellow-500' : 'bg-gray-400'
+                                        <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm ${
+                                            conv.status === 'Online' ? 'bg-emerald-500' : 
+                                            conv.status === 'Away' ? 'bg-amber-500' : 'bg-gray-400'
                                         }`}></div>
                                     </div>
-                                    <div className="ml-3 flex-1 min-w-0">
-                                        <div className="flex items-center justify-between">
-                                            <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    <div className="ml-4 flex-1 min-w-0">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <h3 className="text-sm font-semibold text-gray-900 truncate">
                                                 {conv.name}
                                             </h3>
-                                            <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                                            <span className="text-xs text-gray-500 font-medium">
+                                                {conv.time}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-gray-600 truncate font-medium">
+                                            {conv.lastMessage}
+                                        </p>
+                                        <div className="flex items-center justify-between mt-2">
+                                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                                conv.status === 'Online' ? 'bg-emerald-100 text-emerald-700' : 
+                                                conv.status === 'Away' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600'
+                                            }`}>
                                                 {conv.status}
                                             </span>
+                                            {conv.unread > 0 && (
+                                                <span className="bg-purple-600 text-white text-xs rounded-full px-2 py-1 font-bold">
+                                                    {conv.unread}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -465,73 +492,99 @@ const HomePage = () => {
             </div>
 
             {/* Main Chat Area */}
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col bg-white">
                 {selectedConversation ? (
                     <>
                         {/* Chat Header */}
-                        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+                        <div className="bg-white border-b border-gray-200 p-6 shadow-sm">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                    Workspace: Dev Discussions
-                                </h2>
-                                <div className="flex items-center space-x-2">
-                                    <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+                                <div className="flex items-center space-x-4">
+                                    <img 
+                                        src={selectedConversation.avatar} 
+                                        alt={selectedConversation.name} 
+                                        className="w-12 h-12 rounded-full border-2 border-purple-200 shadow-sm"
+                                    />
+                                    <div>
+                                        <h2 className="text-xl font-bold text-gray-900">
+                                            {selectedConversation.name}
+                                        </h2>
+                                        <p className="text-sm text-gray-600 font-medium">
+                                            Dev Team • {selectedConversation.status}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-3">
+                                    <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl hover:scale-105">
                                         <Paperclip className="w-4 h-4" />
-                                        <span>Attach File</span>
+                                        <span>Attach</span>
                                     </button>
-                                    <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                                        Send Emoji
+                                    <button className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl hover:scale-105">
+                                        <Code className="w-4 h-4" />
+                                        <span>Code</span>
                                     </button>
-                                    <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                                        Send Code
+                                    <button className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl hover:scale-105">
+                                        <Smile className="w-4 h-4" />
+                                        <span>Emoji</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
 
                         {/* Messages Area */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                            {mockMessages.map((msg) => (
-                                <div key={msg.id} className="space-y-1">
-                                    <div className="flex items-center space-x-2">
-                                        <span className="font-medium text-gray-900 dark:text-white text-sm">
-                                            {msg.sender}:
-                                        </span>
-                                        <span className="text-gray-900 dark:text-white text-sm">
-                                            {msg.message}
-                                        </span>
-                                    </div>
-                                    {msg.isHighlighted && (
-                                        <div className="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-3 rounded-r-lg">
-                                            <span className="font-medium text-blue-900 dark:text-blue-100 text-sm">
-                                                {msg.sender}:
-                                            </span>
-                                            <span className="text-blue-900 dark:text-blue-100 text-sm ml-2">
-                                                {msg.message}
-                                            </span>
+                        <div className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-gray-50 to-white">
+                            <div className="space-y-6">
+                                {mockMessages.map((msg) => (
+                                    <div key={msg.id} className="group">
+                                        <div className="flex items-start space-x-4">
+                                            <img 
+                                                src={`https://i.pravatar.cc/150?u=${msg.sender.toLowerCase().replace(' ', '')}`} 
+                                                alt={msg.sender} 
+                                                className="w-10 h-10 rounded-full border-2 border-white shadow-md"
+                                            />
+                                            <div className="flex-1">
+                                                <div className="flex items-center space-x-2 mb-1">
+                                                    <span className="font-semibold text-gray-900 text-sm">
+                                                        {msg.sender}
+                                                    </span>
+                                                    <span className="text-xs text-gray-500 font-medium">
+                                                        {msg.time}
+                                                    </span>
+                                                </div>
+                                                <div className={`p-4 rounded-2xl max-w-2xl ${
+                                                    msg.isHighlighted 
+                                                        ? 'bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-purple-500 shadow-sm' 
+                                                        : 'bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200'
+                                                }`}>
+                                                    <p className="text-gray-800 text-sm leading-relaxed font-medium">
+                                                        {msg.message}
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
-                                    )}
-                                </div>
-                            ))}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Message Input */}
-                        <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
-                            <div className="flex items-center space-x-2">
-                                <input
-                                    type="text"
-                                    value={messageText}
-                                    onChange={(e) => setMessageText(e.target.value)}
-                                    placeholder="Type a message..."
-                                    className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                                <button className="p-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                                    <Smile className="w-5 h-5" />
-                                </button>
-                                <button className="p-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                        <div className="bg-white border-t border-gray-200 p-6">
+                            <div className="flex items-center space-x-4">
+                                <div className="flex-1 relative">
+                                    <input
+                                        type="text"
+                                        value={messageText}
+                                        onChange={(e) => setMessageText(e.target.value)}
+                                        placeholder="Type your message..."
+                                        className="w-full px-6 py-4 bg-gray-100 text-gray-900 placeholder-gray-500 rounded-2xl border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white text-sm font-medium transition-all duration-200 shadow-sm"
+                                    />
+                                    <button className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 hover:text-purple-600 transition-colors">
+                                        <Smile className="w-5 h-5" />
+                                    </button>
+                                </div>
+                                <button className="p-2 text-gray-500 hover:text-purple-600 transition-colors">
                                     <Paperclip className="w-5 h-5" />
                                 </button>
-                                <button className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                                <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white p-4 rounded-2xl transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105">
                                     <Send className="w-5 h-5" />
                                 </button>
                             </div>
@@ -539,20 +592,26 @@ const HomePage = () => {
                     </>
                 ) : (
                     /* Welcome State */
-                    <div className="flex-1 flex items-center justify-center p-8 bg-white dark:bg-gray-800">
-                        <div className="text-center">
-                            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-                                <Code className="w-8 h-8 text-white" />
+                    <div className="flex-1 flex items-center justify-center p-8 bg-gradient-to-br from-gray-50 to-white">
+                        <div className="text-center max-w-md">
+                            <div className="w-20 h-20 bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+                                <Code className="w-10 h-10 text-white" />
                             </div>
-                            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
-                                Welcome to DevChat!
+                            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                                Welcome to DevChat
                             </h2>
-                            <p className="text-gray-600 dark:text-gray-400 mb-6">
-                                Select a conversation to start chatting with your team.
+                            <p className="text-gray-600 mb-8 leading-relaxed">
+                                Select a conversation from the sidebar to start collaborating with your team. 
+                                Share code, discuss projects, and build amazing things together.
                             </p>
-                            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
-                                Start New Conversation
-                            </button>
+                            <div className="flex flex-col space-y-3">
+                                <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105">
+                                    Start New Chat
+                                </button>
+                                <button className="text-gray-600 hover:text-purple-600 px-6 py-3 rounded-xl font-medium transition-colors">
+                                    Browse Teams
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
