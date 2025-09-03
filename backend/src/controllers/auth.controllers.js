@@ -2,6 +2,8 @@ import { generateToken } from "../lib/utils.js";
 import User from "../models/user.models.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
+import { sendOtpEmail } from "../lib/mailer.js";
+import isDisposableEmail from "../lib/disposableEmails.js";
 
 export const signup = async (req, res) => {
   const { username, email, password } = req.body;
@@ -10,7 +12,13 @@ export const signup = async (req, res) => {
     if (!username || !email || !password) {
       return res
         .status(400)
-        .json({ message: "Password must be a length of 6" });
+        .json({ message: "Username, email and password are required" });
+    }
+
+    // basic email format validation
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      return res.status(400).json({ message: 'Invalid email format' });
     }
 
     if (password.length < 6) {
@@ -18,6 +26,12 @@ export const signup = async (req, res) => {
         .status(400)
         .json({ message: "Password must be a length of 6" });
     }
+    // Reject disposable / temporary emails
+    const disposable = await isDisposableEmail(email);
+    if (disposable) {
+      return res.status(400).json({ message: "Unauthorized mail" });
+    }
+
     const user = await User.findOne({ email });
 
     if (user) {
@@ -27,28 +41,36 @@ export const signup = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedpassword = await bcrypt.hash(password, salt);
 
+    // Create user but require OTP verification before issuing JWT
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 1000 * 60 * 10); // 10 minutes
+
     const newUser = new User({
       username: username,
       email: email,
       password: hashedpassword,
+      isVerified: false,
+      otp,
+      otpExpires,
     });
 
-    if (newUser) {
-      generateToken(newUser._id, res);
-      await newUser.save();
+    await newUser.save();
 
-      res.status(201).json({
-        _id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-        profilepic: newUser.profilepic,
-      });
-    } else {
-      return res.status(400).json({ message: "Invalid user data" });
+    // send otp
+    try {
+      const mailResult = await sendOtpEmail({ to: email, otp });
+      const preview = mailResult && mailResult.preview;
+      const resp = { message: 'OTP_SENT', email: newUser.email };
+      if (preview && process.env.NODE_ENV === 'development') resp.preview = preview;
+      return res.status(201).json(resp);
+    } catch (mailErr) {
+      console.error('Error sending OTP email', mailErr);
+      return res.status(500).json({ message: 'Failed to send OTP email' });
     }
   } catch (error) {
-    console.log("Error in Signup");
-    res.status(500).json({ message: "Internal Server Error" });
+  console.error("Error in Signup:", error && (error.message || error));
+  console.error(error && error.stack);
+  res.status(500).json({ message: "Internal Server Error", error: process.env.NODE_ENV === 'development' ? (error && error.message) : undefined });
   }
 };
 
@@ -65,7 +87,27 @@ export const login = async (req, res) => {
     if (!isPasswordcorrect) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
-    
+
+    // If user is not verified, send OTP and ask to verify
+    if (!user.isVerified) {
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const otpExpires = new Date(Date.now() + 1000 * 60 * 10);
+      user.otp = otp;
+      user.otpExpires = otpExpires;
+      await user.save();
+      try {
+        const mailResult = await sendOtpEmail({ to: email, otp });
+        const preview = mailResult && mailResult.preview;
+        const resp = { message: 'OTP_SENT', email: user.email };
+        if (preview && process.env.NODE_ENV === 'development') resp.preview = preview;
+        return res.status(200).json(resp);
+      } catch (mailErr) {
+        console.error('Error sending OTP email', mailErr);
+        return res.status(500).json({ message: 'Failed to send OTP email' });
+      }
+    }
+
+    // If verified, issue token as before
     generateToken(user._id, res);
 
     res.status(200).json({
@@ -77,6 +119,65 @@ export const login = async (req, res) => {
   } catch (error) {
     console.log("Error while logging the user", error.message);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const verifyOtp = async (req, res) => {
+  const { email, otp } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+
+    if (user.isVerified) return res.status(200).json({ message: 'ALREADY_VERIFIED' });
+
+    if (!user.otp || !user.otpExpires) return res.status(400).json({ message: 'No OTP found' });
+
+    if (new Date() > user.otpExpires) return res.status(400).json({ message: 'OTP_EXPIRED' });
+
+    if (user.otp !== otp) return res.status(400).json({ message: 'INVALID_OTP' });
+
+    user.isVerified = true;
+    user.otp = null;
+    user.otpExpires = null;
+    await user.save();
+
+    // issue token now
+    generateToken(user._id, res);
+
+    return res.status(200).json({ message: 'VERIFIED', _id: user._id, email: user.email, username: user.username });
+  } catch (err) {
+    console.error('verifyOtp error', err);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+export const resendOtp = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+
+    if (user.isVerified) return res.status(200).json({ message: 'ALREADY_VERIFIED' });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 1000 * 60 * 10);
+    user.otp = otp;
+    user.otpExpires = otpExpires;
+    await user.save();
+
+    try {
+      const mailResult = await sendOtpEmail({ to: email, otp });
+      const preview = mailResult && mailResult.preview;
+      const resp = { message: 'OTP_SENT' };
+      if (preview && process.env.NODE_ENV === 'development') resp.preview = preview;
+      return res.status(200).json(resp);
+    } catch (mailErr) {
+      console.error('Error sending OTP email', mailErr);
+      return res.status(500).json({ message: 'Failed to send OTP email' });
+    }
+  } catch (err) {
+    console.error('resendOtp error', err);
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 

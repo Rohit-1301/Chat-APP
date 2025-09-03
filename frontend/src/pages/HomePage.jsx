@@ -352,19 +352,19 @@ const HomePage = () => {
 
     // --- Main Chat Interface (for authenticated users) ---
     return (
-        <div className="h-screen flex bg-gray-50">
+        <div className="h-screen flex bg-gradient-to-br from-gray-50 via-white to-gray-100">
             {/* Sidebar */}
-            <div className="w-80 bg-white border-r border-gray-200 flex flex-col shadow-lg">
+            <div className="w-80 bg-white border-r border-gray-200 flex flex-col shadow-xl">
                 {/* Header */}
-                <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+                <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
-                                <Code className="w-6 h-6 text-white" />
+                            <div className="w-12 h-12 bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-2xl ring-4 ring-purple-100">
+                                <Code className="w-7 h-7 text-white" />
                             </div>
                             <div>
                                 <h1 className="text-xl font-bold text-gray-900 tracking-tight">DevChat</h1>
-                                <p className="text-xs text-gray-600 font-medium">Professional Hub</p>
+                                <p className="text-xs text-gray-600 font-semibold">Professional Hub</p>
                             </div>
                         </div>
                         
@@ -417,68 +417,71 @@ const HomePage = () => {
                     </div>
                     
                     {/* Search */}
-                    <div className="relative px-4 mb-4">
-                        <Search className="absolute left-7 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <div className="relative px-4 mb-6">
+                        <Search className="absolute left-7 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                         <input
                             type="text"
                             placeholder="Search conversations..."
-                            className="w-full pl-10 pr-4 py-3 bg-gray-100 text-gray-900 placeholder-gray-500 rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white text-sm font-medium transition-all duration-200"
+                            className="w-full pl-12 pr-4 py-4 bg-gradient-to-r from-gray-50 to-white text-gray-900 placeholder-gray-500 rounded-2xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:bg-white text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
                         />
                     </div>
                 </div>
 
                 {/* Chats Section */}
-                <div className="flex-1 overflow-y-auto px-4">
+                <div className="flex-1 overflow-y-auto px-4 pb-4">
                     <div className="mb-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-bold text-gray-900">Recent Chats</h2>
-                            <button className="text-purple-600 hover:text-purple-700 transition-colors">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-lg font-bold text-gray-900 flex items-center">
+                                <div className="w-2 h-6 bg-gradient-to-b from-purple-600 to-blue-600 rounded-full mr-3"></div>
+                                Recent Chats
+                            </h2>
+                            <button className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 p-2 rounded-xl transition-all duration-200">
                                 <PlusCircle className="w-5 h-5" />
                             </button>
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                             {conversations.map((conv) => (
                                 <div
                                     key={conv.id}
                                     onClick={() => setSelectedConversation(conv)}
-                                    className={`flex items-center p-4 rounded-xl cursor-pointer transition-all duration-200 hover:shadow-md ${
+                                    className={`group flex items-center p-4 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.02] ${
                                         selectedConversation?.id === conv.id 
-                                            ? 'bg-gradient-to-r from-purple-50 to-blue-50 border-l-4 border-purple-500 shadow-md' 
-                                            : 'hover:bg-gray-50 hover:scale-[1.02]'
+                                            ? 'bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border-2 border-purple-200 shadow-xl ring-4 ring-purple-100' 
+                                            : 'hover:bg-gradient-to-r hover:from-gray-50 hover:to-white hover:shadow-xl border-2 border-transparent hover:border-gray-200'
                                     }`}
                                 >
                                     <div className="relative">
                                         <img 
                                             src={conv.avatar} 
                                             alt={conv.name} 
-                                            className="w-12 h-12 rounded-full border-2 border-white shadow-sm"
+                                            className="w-14 h-14 rounded-full border-3 border-white shadow-lg ring-2 ring-gray-100"
                                         />
-                                        <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm ${
+                                        <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-3 border-white shadow-lg ${
                                             conv.status === 'Online' ? 'bg-emerald-500' : 
                                             conv.status === 'Away' ? 'bg-amber-500' : 'bg-gray-400'
                                         }`}></div>
                                     </div>
                                     <div className="ml-4 flex-1 min-w-0">
                                         <div className="flex items-center justify-between mb-1">
-                                            <h3 className="text-sm font-semibold text-gray-900 truncate">
+                                            <h3 className="text-sm font-bold text-gray-900 truncate group-hover:text-purple-800 transition-colors">
                                                 {conv.name}
                                             </h3>
-                                            <span className="text-xs text-gray-500 font-medium">
+                                            <span className="text-xs text-gray-500 font-semibold bg-gray-100 px-2 py-1 rounded-lg">
                                                 {conv.time}
                                             </span>
                                         </div>
-                                        <p className="text-xs text-gray-600 truncate font-medium">
+                                        <p className="text-xs text-gray-600 truncate font-medium mb-2 leading-relaxed">
                                             {conv.lastMessage}
                                         </p>
-                                        <div className="flex items-center justify-between mt-2">
-                                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                                conv.status === 'Online' ? 'bg-emerald-100 text-emerald-700' : 
-                                                conv.status === 'Away' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600'
+                                        <div className="flex items-center justify-between">
+                                            <span className={`text-xs px-3 py-1 rounded-full font-bold ${
+                                                conv.status === 'Online' ? 'bg-emerald-100 text-emerald-800' : 
+                                                conv.status === 'Away' ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-700'
                                             }`}>
                                                 {conv.status}
                                             </span>
                                             {conv.unread > 0 && (
-                                                <span className="bg-purple-600 text-white text-xs rounded-full px-2 py-1 font-bold">
+                                                <span className="bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xs rounded-full px-3 py-1 font-bold shadow-lg">
                                                     {conv.unread}
                                                 </span>
                                             )}
@@ -492,7 +495,7 @@ const HomePage = () => {
             </div>
 
             {/* Main Chat Area */}
-            <div className="flex-1 flex flex-col bg-white">
+            <div className="flex-1 flex flex-col bg-gradient-to-br from-white via-gray-50 to-blue-50">
                 {selectedConversation ? (
                     <>
                         {/* Chat Header */}

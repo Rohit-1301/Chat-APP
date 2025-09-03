@@ -6,6 +6,7 @@ import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import SettingsPage from "./pages/SettingsPage";
 import ThemeTest from "./pages/ThemeTest";
+import OtpPage from "./pages/OtpPage";
 import { useAuthStore } from "./store/useAuthStore";
 
 const App = () => {
@@ -41,6 +42,7 @@ const App = () => {
           path="/login" 
           element={!authUser ? <LoginPage /> : <Navigate to="/" />} 
         />
+  <Route path="/otp" element={<OtpPage />} />
         <Route 
           path="/settings" 
           element={authUser ? <SettingsPage /> : <Navigate to="/login" />} 
