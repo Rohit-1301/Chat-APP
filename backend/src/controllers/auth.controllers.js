@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
 import { sendOtpEmail } from "../lib/mailer.js";
 import isDisposableEmail from "../lib/disposableEmails.js";
+import { generateDeviceFingerprint, isDeviceTrusted, addTrustedDevice, updateDeviceLastUsed } from "../lib/deviceFingerprint.js";
 
 export const signup = async (req, res) => {
   const { username, email, password } = req.body;
@@ -88,17 +89,29 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // If user is not verified, send OTP and ask to verify
-    if (!user.isVerified) {
+    // Generate device fingerprint
+    const deviceFingerprint = generateDeviceFingerprint(req);
+    const userAgent = req.headers['user-agent'] || '';
+
+    // Check if user is verified and device is trusted
+    const deviceTrusted = isDeviceTrusted(user, deviceFingerprint);
+
+    if (!user.isVerified || !deviceTrusted) {
+      // Send OTP for unverified users or new/untrusted devices
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      const otpExpires = new Date(Date.now() + 1000 * 60 * 10);
+      const otpExpires = new Date(Date.now() + 1000 * 60 * 10); // 10 minutes
       user.otp = otp;
       user.otpExpires = otpExpires;
       await user.save();
+      
       try {
         const mailResult = await sendOtpEmail({ to: email, otp });
         const preview = mailResult && mailResult.preview;
-        const resp = { message: 'OTP_SENT', email: user.email };
+        const resp = { 
+          message: 'OTP_SENT', 
+          email: user.email,
+          reason: !user.isVerified ? 'account_not_verified' : 'new_device'
+        };
         if (preview && process.env.NODE_ENV === 'development') resp.preview = preview;
         return res.status(200).json(resp);
       } catch (mailErr) {
@@ -107,7 +120,14 @@ export const login = async (req, res) => {
       }
     }
 
-    // If verified, issue token as before
+    // Update device last used time for trusted devices
+    await updateDeviceLastUsed(user, deviceFingerprint);
+    
+    // Update last login time
+    user.lastLoginAt = new Date();
+    await user.save();
+
+    // If verified and trusted device, issue token as before
     generateToken(user._id, res);
 
     res.status(200).json({
@@ -128,7 +148,9 @@ export const verifyOtp = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
-    if (user.isVerified) return res.status(200).json({ message: 'ALREADY_VERIFIED' });
+    if (user.isVerified && isDeviceTrusted(user, generateDeviceFingerprint(req))) {
+      return res.status(200).json({ message: 'ALREADY_VERIFIED' });
+    }
 
     if (!user.otp || !user.otpExpires) return res.status(400).json({ message: 'No OTP found' });
 
@@ -136,15 +158,27 @@ export const verifyOtp = async (req, res) => {
 
     if (user.otp !== otp) return res.status(400).json({ message: 'INVALID_OTP' });
 
+    // Mark user as verified and add device as trusted
     user.isVerified = true;
     user.otp = null;
     user.otpExpires = null;
-    await user.save();
+    user.lastLoginAt = new Date();
+    
+    // Add current device as trusted
+    const deviceFingerprint = generateDeviceFingerprint(req);
+    const userAgent = req.headers['user-agent'] || '';
+    await addTrustedDevice(user, deviceFingerprint, userAgent);
 
     // issue token now
     generateToken(user._id, res);
 
-    return res.status(200).json({ message: 'VERIFIED', _id: user._id, email: user.email, username: user.username });
+    return res.status(200).json({ 
+      message: 'VERIFIED', 
+      _id: user._id, 
+      email: user.email, 
+      username: user.username,
+      profilepic: user.profilepic
+    });
   } catch (err) {
     console.error('verifyOtp error', err);
     return res.status(500).json({ message: 'Internal Server Error' });
@@ -209,7 +243,7 @@ export const updateProfile = async (req, res) => {
     res.status(200).json(updateUser);
   } catch (error) {
     console.log(
-      "Something went wron while uploading the profilepic",
+      "Something went wrong while uploading the profilepic",
       error.message
     );
     res.status(500).json({ message: "Internal Server error" });

@@ -33,6 +33,16 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    lastLoginAt: {
+      type: Date,
+      default: null,
+    },
+    trustedDevices: [{
+      fingerprint: String,
+      userAgent: String,
+      lastUsed: Date,
+      verifiedAt: Date,
+    }],
   },
   { timestamps: true }
 );
